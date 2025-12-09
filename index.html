@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Run Your Game — مقدمة ونشر اللعبة</title>
+<style>
+:root{--bg:#0b0f17;--card:#0f1724;--accent:#ff5a00;--glass:rgba(255,255,255,0.05)}
+*{box-sizing:border-box;font-family: 'Segoe UI', Tahoma, Arial, sans-serif}
+body,html{height:100%;margin:0;background:linear-gradient(180deg,#020305 0%,#071025 100%);color:#fff}
+
+/* Intro full-screen */
+.intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:40}
+.panel{width:92%;max-width:900px;padding:28px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 10px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px);text-align:center}
+.logo{font-weight:800;font-size:34px;letter-spacing:2px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:12px}
+.mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ffd19e);display:grid;place-items:center;font-weight:900;color:#101018}
+.subtitle{opacity:0.85;margin-bottom:18px}
+
+/* Animated lines */
+.stage{height:120px;position:relative;overflow:hidden}
+.stage .line{position:absolute;left:-120%;top:50%;transform:translateY(-50%);font-size:46px;font-weight:900;white-space:nowrap}
+.line:nth-child(1){animation:fly1 2s cubic-bezier(.2,.9,.2,1) forwards}
+.line:nth-child(2){animation:fly2 2s 0.6s cubic-bezier(.2,.9,.2,1) forwards}
+.line:nth-child(3){animation:fly3 2s 1.2s cubic-bezier(.2,.9,.2,1) forwards}
+@keyframes fly1{to{left:5%;opacity:1;}}@keyframes fly2{to{left:5%;opacity:1;}}@keyframes fly3{to{left:5%;opacity:1;}}
+.skip{margin-top:12px;opacity:0.75}
+.btn{background:var(--accent);border:none;padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer}
+
+/* App container */
+.app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:760px;background:var(--card);border-radius:16px;padding:26px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+.step{display:none;animation:fadeIn .45s ease both}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+label{display:block;margin-bottom:8px;font-weight:700}
+input[type=text],select,input[type=url]{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+.actions{display:flex;gap:12px;justify-content:flex-end;margin-top:18px}
+.muted{opacity:0.7;font-size:13px}
+
+/* Publish options */
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.opt{border-radius:12px;padding:12px;background:var(--glass);border:1px dashed rgba(255,255,255,0.03);text-align:center}
+.opt input{margin-top:10px}
+
+/* Published games list */
+.published{margin-top:18px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px}
+.game-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:8px;border-radius:10px;background:rgba(255,255,255,0.05)}
+.game-item a{color:var(--accent);text-decoration:none;font-weight:700}
+.game-item button{background:#6b7280;padding:4px 10px;border-radius:8px;border:none;cursor:pointer;font-size:12px}
+
+/* small responsive */
+@media (max-width:520px){.logo{font-size:20px}.line{font-size:30px}}
+</style>
+</head>
+<body dir="rtl">
+
+<!-- INTRO ANIMATION -->
+<div class="intro" id="intro">
+  <div class="panel">
+    <div class="logo"><div class="mark">RYG</div>Run Your Game</div>
+    <div class="subtitle">انميشن ترحيبي رهيب — استعد لتشغيل لعبتك!</div>
+    <div class="stage" aria-hidden="true">
+      <div class="line">run</div>
+      <div class="line" style="top:70%">your</div>
+      <div class="line" style="top:30%">game</div>
+    </div>
+    <div class="muted">انتهى الانميشن — اضغط ابدأ للمتابعة</div>
+    <div style="margin-top:16px"><button class="btn" id="startBtn">ابدأ</button></div>
+    <div class="skip muted">أو اضغط على أيقونة تخطي حتى ترى الفورم بسرعة</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="app" style="display:none">
+  <div class="card">
+    <h2 style="margin:0 0 8px 0">مرحبًا بك — نشر لعبتك</h2>
+    <p class="muted">اتبع الخطوات: اكتب اسمك الكامل، المرحلة الدراسية، اسم المدرسة، ثم اختَر طريقة النشر.</p>
+
+    <!-- Step: Full name -->
+    <div class="step active" id="step-1">
+      <label>أدخل اسمك الرباعي</label>
+      <input id="fullname" type="text" placeholder="الاسم الرباعي - مثال: آدم محمد ياسين خضير" />
+      <div class="actions"><button class="btn" id="toStep2">التالي</button></div>
+    </div>
+
+    <!-- Step: Grade -->
+    <div class="step" id="step-2">
+      <label>اكتب بأي مرحلة دراسية أنت</label>
+      <input id="grade" type="text" placeholder="مثال: الصف السادس ابتدائي" />
+      <div class="actions">
+        <button class="btn" id="backTo1" style="background:#6b7280">عودة</button>
+        <button class="btn" id="toStep3">التالي</button>
+      </div>
+    </div>
+
+    <!-- Step: School -->
+    <div class="step" id="step-3">
+      <label>اكتب اسم مدرستك</label>
+      <input id="school" type="text" placeholder="مثال: مدرسة المحبة الابتدائية" />
+      <div class="actions">
+        <button class="btn" id="backTo2" style="background:#6b7280">عودة</button>
+        <button class="btn" id="toStep4">التالي</button>
+      </div>
+    </div>
+
+    <!-- Step: Publish -->
+    <div class="step" id="step-4">
+      <h3 style="margin-top:0">اختر طريقة لنشر لعبتك</h3>
+      <div class="options">
+        <div class="opt">
+          <div style="font-weight:800">رفع ملف اللعبة</div>
+          <div class="muted">اختيار ملف مضغوط zip او ملف اللعبة</div>
+          <input id="fileInput" type="file" accept=".zip,.rar,.exe,.apk" />
+        </div>
+        <div class="opt">
+          <div style="font-weight:800">رابط اللعبة</div>
+          <div class="muted">ألصق رابط موقع أو صفحة المتجر</div>
+          <input id="linkInput" type="url" placeholder="https://" />
+        </div>
+        <div class="opt">
+          <div style="font-weight:800">اسم اللعبة على المتجر</div>
+          <div class="muted">اكتب اسم لعبتك كما يظهر في المتجر (اختياري)</div>
+          <input id="storeNameInput" type="text" placeholder="مثال: MyAwesomeGame" />
+        </div>
+      </div>
+      <div style="margin-top:14px" class="muted">ملاحظة: سيتم حفظ بياناتك محليًا ويمكن لأي شخص رؤية اللعبة أو حذفها.</div>
+
+      <div class="actions">
+        <button class="btn" id="backTo3" style="background:#6b7280">عودة</button>
+        <button class="btn" id="publishBtn">انشر لعبتي</button>
+      </div>
+
+      <div id="result" style="margin-top:14px;display:none;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);">
+        <strong>تم نشر لعبتك! 🎮</strong>
+        <div class="published" id="publishedList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const intro = document.getElementById('intro');
+const app = document.getElementById('app');
+const startBtn = document.getElementById('startBtn');
+const steps = [...document.querySelectorAll('.step')];
+let current = 0;
+
+function showStep(i){steps.forEach((s,idx)=>{s.classList.toggle('active', idx===i)});current=i}
+
+startBtn.addEventListener('click', ()=>{
+  intro.style.transition='opacity 0.4s';intro.style.opacity='0';
+  setTimeout(()=>{intro.style.display='none';app.style.display='flex';},420);
+});
+
+intro.addEventListener('click', (e)=>{if(e.target.id!=='startBtn'){startBtn.click()}});
+
+document.getElementById('toStep2').addEventListener('click', ()=>{
+  const name = document.getElementById('fullname').value.trim();
+  if(name.length<3){alert('اكتب اسمك الرباعي على الأقل');return}
+  showStep(1);
+});
+document.getElementById('backTo1').addEventListener('click', ()=>showStep(0));
+
+document.getElementById('toStep3').addEventListener('click', ()=>{
+  const grade = document.getElementById('grade').value.trim();
+  if(grade.length<2){alert('اكتب مرحلتك الدراسية');return}
+  showStep(2);
+});
+document.getElementById('backTo2').addEventListener('click', ()=>showStep(1));
+
+document.getElementById('toStep4').addEventListener('click', ()=>{
+  const school = document.getElementById('school').value.trim();
+  if(school.length<2){alert('اكتب اسم مدرستك');return}
+  showStep(3);
+});
+document.getElementById('backTo3').addEventListener('click', ()=>showStep(2));
+
+// --- Published games ---
+const publishedList = document.getElementById('publishedList');
+
+function addPublishedGame(data){
+  const div = document.createElement('div');
+  div.className='game-item';
+  const linkText = data.link||'#';
+  div.innerHTML=`<a href="${linkText}" target="_blank">${data.store||'لعبتك الجديدة'}</a>
+  <button onclick="this.parentElement.remove()">حذف اللعبة</button>`;
+  publishedList.appendChild(div);
+}
+
+document.getElementById('publishBtn').addEventListener('click', ()=>{
+  const name=document.getElementById('fullname').value.trim();
+  const grade=document.getElementById('grade').value.trim();
+  const school=document.getElementById('school').value.trim();
+  const file=document.getElementById('fileInput').files[0];
+  const link=document.getElementById('linkInput').value.trim();
+  const store=document.getElementById('storeNameInput').value.trim();
+
+  if(!file && !link && !store){alert('اختر طريقة نشر واحدة على الأقل');return}
+
+  addPublishedGame({file:file?file.name:'',link:link,store:store||'لعبتك الجديدة'});
+  document.getElementById('result').style.display='block';
+});
+
+// small accessibility: allow Enter to act like click on inputs
+[...document.querySelectorAll('input')].forEach(inp=>{
+  inp.addEventListener('keydown', e=>{if(e.key==='Enter'){
+    const idx = steps.findIndex(s=>s.classList.contains('active'));
+    if(idx<steps.length-1){showStep(idx+1);} else {document.getElementById('publishBtn').click()}
+  }})
+});
+</script>
+</body>
+</html>
